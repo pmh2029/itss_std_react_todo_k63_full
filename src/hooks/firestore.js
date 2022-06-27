@@ -1,7 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 /* ライブラリ */
-import { addFirebaseItem, updateFirebaseItem, getFirebaseItems, clearFirebaseItem } from "../lib/firebase";
+import {
+  addFirebaseItem,
+  updateFirebaseItem,
+  getFirebaseItems,
+  clearFirebaseItem,
+} from "../lib/firebase";
 
 function useFirestore() {
   const [items, setItems] = useState([]);
@@ -15,32 +20,32 @@ function useFirestore() {
     setItems(_items);
   };
 
-  const addItem = async item => {
+  const addItem = async (item) => {
     const newItem = { text: item.text, done: item.done };
     await addFirebaseItem(newItem);
     setItems([...items, newItem]);
   };
 
-  const updateItem = async checked => {
-    const newItem = { ...checked, done: !checked.done };
-    await updateFirebaseItem(newItem, checked.id);
+  const updateItem = async (checked) => {
+    const changes = { done: !checked.done };
+    await updateFirebaseItem(changes, checked.id);
     const newItems = items.map((item) => {
       if (item.id === checked.id) {
-        item.done = !checked.done;
+        item = { ...item, changes };
       }
       return item;
-    })
+    });
     setItems(newItems);
-  }
+  };
 
   const clearItems = () => {
-    items.map(item => {
+    items.map((item) => {
       clearFirebaseItem(item);
-    })
+    });
     setItems([]);
   };
 
   return [items, addItem, updateItem, clearItems];
 }
 
-export default useFirestore; 
+export default useFirestore;
